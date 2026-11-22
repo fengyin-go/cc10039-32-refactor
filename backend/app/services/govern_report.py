@@ -9,6 +9,7 @@ import datetime
 from typing import Any
 
 from app.services.base import BaseModuleService
+from app.services.completion_receipt import completion_registry
 from app.store import store
 
 
@@ -56,9 +57,24 @@ class GovernReportService(BaseModuleService):
         broken_lineages = [l for l in lineage_rows if l.get("status") == "链路断裂"]
         uncertain_lineages = [l for l in lineage_rows if l.get("status") == "待验证"]
 
-        # 6) 汇总回填任务
+        # 6) 汇总回填任务：既有事件计数保持不变，完成行数改由统一回执入账
         backfill_events = store.events_for_module("backfill_job")
         completed_backfills = [e for e in backfill_events if e["event_type"] == "backfill_completed_to_govern"]
+
+        # 完成状态已持久化但回执尚未确认的回填，在生成报告时统一入账（幂等）
+        for receipt in completion_registry.pending_confirmation("govern_report"):
+            if receipt["task_module"] == "backfill_job":
+                completion_registry.confirm(
+                    receipt["task_module"], receipt["task_id"], self.MODULE
+                )
+        # 按目标湖表汇总已入账回填行数；只统计已确认回执，重投不重复入账
+        backfill_table_metrics = completion_registry.metrics_by_table("backfill_job")
+        total_backfill_records = sum(
+            metric["record_count"] for metric in backfill_table_metrics.values()
+        )
+        confirmed_backfill_receipts = sum(
+            metric["confirmed_receipt_count"] for metric in backfill_table_metrics.values()
+        )
 
         # 组装报告
         report_data = {
@@ -83,6 +99,9 @@ class GovernReportService(BaseModuleService):
             },
             "backfill_summary": {
                 "completed_backfills": len(completed_backfills),
+                "confirmed_receipts": confirmed_backfill_receipts,
+                "total_backfill_records": total_backfill_records,
+                "by_table": backfill_table_metrics,
             },
         }
 
@@ -102,6 +121,8 @@ class GovernReportService(BaseModuleService):
         entry["abnormal"] = False
         entry["优化建议"] = "；".join(suggestions) if suggestions else "当前治理状态良好"
         entry["执行状态"] = "报告已生成"
+        # 保留最近一次报告数据，便于恢复前后对照报告合计
+        entry["report_data"] = report_data
 
         store.log_event("govern_report_generated", "govern_report", "govern_report", {
             "report_id": entry_id,
@@ -110,7 +131,8 @@ class GovernReportService(BaseModuleService):
 
         return entry, (
             f"治理报告已生成：迁移分区={total_migrated}，质量检查={len(quality_passes) + len(quality_failures)}，"
-            f"血缘链路={len(lineage_rows)}，回填任务={len(completed_backfills)}"
+            f"血缘链路={len(lineage_rows)}，回填任务={len(completed_backfills)}，"
+            f"回填入账行数={total_backfill_records}"
         )
 
     def execute_optimization(self, entry_id: int) -> tuple[dict[str, Any] | None, str]:

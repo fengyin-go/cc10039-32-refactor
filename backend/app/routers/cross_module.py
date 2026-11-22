@@ -11,6 +11,7 @@ from fastapi import APIRouter, HTTPException, Query
 
 from app.services import service_for, SERVICES
 from app.store import store
+from app.services.completion_receipt import completion_registry
 from app.services.partition_policy import PartitionPolicyService
 from app.services.lake_table import LakeTableService
 from app.services.storage_tier import StorageTierService
@@ -18,6 +19,7 @@ from app.services.file_compaction import FileCompactionService
 from app.services.retention_mgr import RetentionMgrService
 from app.services.backfill_job import BackfillJobService
 from app.services.govern_report import GovernReportService
+from app.services.quality_monitor import QualityMonitorService
 
 router = APIRouter(prefix="/api/cross", tags=["跨模块编排"])
 
@@ -48,6 +50,49 @@ def list_snapshots() -> dict[str, Any]:
         "total": len(store._snapshots),
         "keys": store.snapshot_keys(),
     }
+
+
+@router.get("/completion-receipts")
+def list_completion_receipts(
+    task_module: str | None = Query(default=None),
+    target_table: str | None = Query(default=None),
+    confirmed: bool | None = Query(default=None),
+    task_no: str | None = Query(default=None),
+) -> dict[str, Any]:
+    """查询统一任务完成数据回执，支持按任务类型/湖表/确认状态/原任务号核对。"""
+    if task_no:
+        receipts = completion_registry.find_by_task_no(task_no, task_module)
+    else:
+        receipts = completion_registry.all(
+            task_module=task_module, target_table=target_table, confirmed=confirmed
+        )
+    return {"total": len(receipts), "items": receipts}
+
+
+@router.get("/completion-receipts/pending")
+def pending_completion_receipts(
+    consumer: str | None = Query(default=None),
+) -> dict[str, Any]:
+    """完成状态已持久化但回执尚未确认、下游可以入账的完成数。"""
+    receipts = completion_registry.pending_confirmation(consumer)
+    return {"total": len(receipts), "items": receipts}
+
+
+@router.get("/completion-receipts/table-metrics")
+def completion_table_metrics(
+    task_module: str = Query(...),
+    target_table: str | None = Query(default=None),
+) -> dict[str, Any]:
+    """按湖表查询入湖/回填任务计量；不同湖表、不同任务类型互不串数。"""
+    if target_table:
+        return completion_registry.table_metrics(target_table, task_module)
+    return {"task_module": task_module, "by_table": completion_registry.metrics_by_table(task_module)}
+
+
+@router.get("/quality-ingest")
+def quality_ingest_results(target_table: str = Query(...)) -> dict[str, Any]:
+    """质量监控侧按湖表查询已入账的入湖完成数。"""
+    return QualityMonitorService().ingest_quality_for_table(target_table)
 
 
 @router.get("/overview")

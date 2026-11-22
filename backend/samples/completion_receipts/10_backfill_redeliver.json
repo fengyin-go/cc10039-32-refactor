@@ -1,0 +1,67 @@
+{
+  "first_redeliver": {
+    "ok": true,
+    "message": "回填任务 demo_库存回填任务_下一笔 完工请求已重发（第 2 次投递），回执 CR-BACKFILL_JOB-0003 已补交给治理报告",
+    "entry": {
+      "id": 5,
+      "任务名称": "demo_库存回填任务_下一笔",
+      "目标湖表": "demo_库存湖表",
+      "回填时间范围": "2026-09-01~2026-09-15",
+      "处理记录数": "40",
+      "执行状态": null,
+      "status": "已完成",
+      "pending": false,
+      "abnormal": false
+    }
+  },
+  "repeat_redeliver": {
+    "ok": true,
+    "message": "回填任务 demo_库存回填任务_下一笔 完工请求已重发（第 4 次投递），回执 CR-BACKFILL_JOB-0003 已投递，跳过重复事件（待治理报告确认）",
+    "entry": {
+      "id": 5,
+      "任务名称": "demo_库存回填任务_下一笔",
+      "目标湖表": "demo_库存湖表",
+      "回填时间范围": "2026-09-01~2026-09-15",
+      "处理记录数": "40",
+      "执行状态": null,
+      "status": "已完成",
+      "pending": false,
+      "abnormal": false
+    }
+  },
+  "govern_event_count": 1,
+  "govern_events": [
+    {
+      "id": 12,
+      "event_type": "backfill_completed_to_govern",
+      "source_module": "backfill_job",
+      "target_module": "govern_report",
+      "timestamp": "2026-11-22T06:13:52.682152",
+      "payload": {
+        "task_id": 5,
+        "table_name": "demo_库存湖表",
+        "total_records": 40,
+        "receipt_no": "CR-BACKFILL_JOB-0003"
+      }
+    }
+  ],
+  "receipt": {
+    "receipt_no": "CR-BACKFILL_JOB-0003",
+    "task_module": "backfill_job",
+    "task_id": 5,
+    "task_no": "5",
+    "task_name": "demo_库存回填任务_下一笔",
+    "target_table": "demo_库存湖表",
+    "record_count": 40,
+    "status": "已完成",
+    "consumer_module": "govern_report",
+    "registered_at": "2026-11-22T06:13:52.681906",
+    "delivered": true,
+    "delivered_at": "2026-11-22T06:13:52.682155",
+    "confirmed": false,
+    "confirmed_at": null,
+    "confirmed_by": null,
+    "confirmations": 0,
+    "delivery_count": 4
+  }
+}

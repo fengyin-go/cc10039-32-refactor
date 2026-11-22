@@ -1,0 +1,19 @@
+{
+  "receipt_no": "CR-INGEST_PIPELINE-0001",
+  "task_module": "ingest_pipeline",
+  "task_id": 4,
+  "task_no": "4",
+  "task_name": "demo_销量入湖任务",
+  "target_table": "demo_销量湖表",
+  "record_count": 120,
+  "status": "已完成",
+  "consumer_module": "quality_monitor",
+  "registered_at": "2026-11-22T06:13:52.679796",
+  "delivered": true,
+  "delivered_at": "2026-11-22T06:13:52.679803",
+  "confirmed": true,
+  "confirmed_at": "2026-11-22T06:13:52.679801",
+  "confirmed_by": "quality_monitor",
+  "confirmations": 1,
+  "delivery_count": 1
+}

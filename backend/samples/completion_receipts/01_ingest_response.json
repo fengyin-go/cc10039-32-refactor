@@ -1,0 +1,15 @@
+{
+  "ok": true,
+  "message": "入湖管道 demo_销量入湖任务 已完成，入湖 120 条记录，回执 CR-INGEST_PIPELINE-0001 已通知质量监控",
+  "entry": {
+    "id": 4,
+    "任务名称": "demo_销量入湖任务",
+    "来源系统": "销售中台",
+    "目标湖表": "demo_销量湖表",
+    "数据格式": "json",
+    "执行状态": null,
+    "status": "已完成",
+    "pending": false,
+    "abnormal": false
+  }
+}

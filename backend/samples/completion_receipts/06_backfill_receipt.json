@@ -1,0 +1,19 @@
+{
+  "receipt_no": "CR-BACKFILL_JOB-0002",
+  "task_module": "backfill_job",
+  "task_id": 4,
+  "task_no": "4",
+  "task_name": "demo_库存回填任务",
+  "target_table": "demo_库存湖表",
+  "record_count": 76,
+  "status": "已完成",
+  "consumer_module": "govern_report",
+  "registered_at": "2026-11-22T06:13:52.681032",
+  "delivered": true,
+  "delivered_at": "2026-11-22T06:13:52.681035",
+  "confirmed": true,
+  "confirmed_at": "2026-11-22T06:13:52.681046",
+  "confirmed_by": "govern_report",
+  "confirmations": 1,
+  "delivery_count": 1
+}

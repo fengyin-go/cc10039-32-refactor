@@ -1,0 +1,68 @@
+{
+  "ingest_task_no": "4",
+  "backfill_task_no": "4",
+  "next_backfill_task_no": "5",
+  "ingest": [
+    {
+      "receipt_no": "CR-INGEST_PIPELINE-0001",
+      "task_module": "ingest_pipeline",
+      "task_id": 4,
+      "task_no": "4",
+      "task_name": "demo_销量入湖任务",
+      "target_table": "demo_销量湖表",
+      "record_count": 120,
+      "status": "已完成",
+      "consumer_module": "quality_monitor",
+      "registered_at": "2026-11-22T06:13:52.679796",
+      "delivered": true,
+      "delivered_at": "2026-11-22T06:13:52.679803",
+      "confirmed": true,
+      "confirmed_at": "2026-11-22T06:13:52.679801",
+      "confirmed_by": "quality_monitor",
+      "confirmations": 1,
+      "delivery_count": 1
+    }
+  ],
+  "backfill": [
+    {
+      "receipt_no": "CR-BACKFILL_JOB-0002",
+      "task_module": "backfill_job",
+      "task_id": 4,
+      "task_no": "4",
+      "task_name": "demo_库存回填任务",
+      "target_table": "demo_库存湖表",
+      "record_count": 76,
+      "status": "已完成",
+      "consumer_module": "govern_report",
+      "registered_at": "2026-11-22T06:13:52.681032",
+      "delivered": true,
+      "delivered_at": "2026-11-22T06:13:52.681035",
+      "confirmed": true,
+      "confirmed_at": "2026-11-22T06:13:52.681046",
+      "confirmed_by": "govern_report",
+      "confirmations": 1,
+      "delivery_count": 1
+    }
+  ],
+  "next_backfill": [
+    {
+      "receipt_no": "CR-BACKFILL_JOB-0003",
+      "task_module": "backfill_job",
+      "task_id": 5,
+      "task_no": "5",
+      "task_name": "demo_库存回填任务_下一笔",
+      "target_table": "demo_库存湖表",
+      "record_count": 40,
+      "status": "已完成",
+      "consumer_module": "govern_report",
+      "registered_at": "2026-11-22T06:13:52.681906",
+      "delivered": true,
+      "delivered_at": "2026-11-22T06:13:52.682155",
+      "confirmed": true,
+      "confirmed_at": "2026-11-22T06:13:52.682395",
+      "confirmed_by": "govern_report",
+      "confirmations": 1,
+      "delivery_count": 4
+    }
+  ]
+}

@@ -1,0 +1,299 @@
+{
+  "all_passed": true,
+  "checks": [
+    {
+      "check": "入湖回执 120 行且质量已确认",
+      "passed": true,
+      "detail": {
+        "receipt_no": "CR-INGEST_PIPELINE-0001",
+        "task_module": "ingest_pipeline",
+        "task_id": 4,
+        "task_no": "4",
+        "task_name": "demo_销量入湖任务",
+        "target_table": "demo_销量湖表",
+        "record_count": 120,
+        "status": "已完成",
+        "consumer_module": "quality_monitor",
+        "registered_at": "2026-11-22T06:13:52.679796",
+        "delivered": true,
+        "delivered_at": "2026-11-22T06:13:52.679803",
+        "confirmed": true,
+        "confirmed_at": "2026-11-22T06:13:52.679801",
+        "confirmed_by": "quality_monitor",
+        "confirmations": 1,
+        "delivery_count": 1
+      }
+    },
+    {
+      "check": "回填回执 76 行",
+      "passed": true,
+      "detail": {
+        "receipt_no": "CR-BACKFILL_JOB-0002",
+        "task_module": "backfill_job",
+        "task_id": 4,
+        "task_no": "4",
+        "task_name": "demo_库存回填任务",
+        "target_table": "demo_库存湖表",
+        "record_count": 76,
+        "status": "已完成",
+        "consumer_module": "govern_report",
+        "registered_at": "2026-11-22T06:13:52.681032",
+        "delivered": true,
+        "delivered_at": "2026-11-22T06:13:52.681035",
+        "confirmed": true,
+        "confirmed_at": "2026-11-22T06:13:52.681046",
+        "confirmed_by": "govern_report",
+        "confirmations": 1,
+        "delivery_count": 1
+      }
+    },
+    {
+      "check": "回填任务记录条数=76 与回执一致",
+      "passed": true,
+      "detail": {
+        "entry": "76",
+        "receipt": 76
+      }
+    },
+    {
+      "check": "打断期间无治理事件",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "check": "打断时回执未确认且可入账",
+      "passed": true,
+      "detail": {
+        "paused_confirmed": false,
+        "paused_pending_ids": [
+          [
+            "backfill_job",
+            5,
+            40
+          ]
+        ]
+      }
+    },
+    {
+      "check": "恢复前后报告合计 76 → 116",
+      "passed": true,
+      "detail": {
+        "before": 76,
+        "after": 116
+      }
+    },
+    {
+      "check": "下一笔回填重发只投递一次事件",
+      "passed": true,
+      "detail": {
+        "events": 1,
+        "delivery_count": 4
+      }
+    },
+    {
+      "check": "下一笔回填恢复后已确认且只入账一次",
+      "passed": true,
+      "detail": {
+        "receipt_no": "CR-BACKFILL_JOB-0003",
+        "task_module": "backfill_job",
+        "task_id": 5,
+        "task_no": "5",
+        "task_name": "demo_库存回填任务_下一笔",
+        "target_table": "demo_库存湖表",
+        "record_count": 40,
+        "status": "已完成",
+        "consumer_module": "govern_report",
+        "registered_at": "2026-11-22T06:13:52.681906",
+        "delivered": true,
+        "delivered_at": "2026-11-22T06:13:52.682155",
+        "confirmed": true,
+        "confirmed_at": "2026-11-22T06:13:52.682395",
+        "confirmed_by": "govern_report",
+        "confirmations": 1,
+        "delivery_count": 4
+      }
+    },
+    {
+      "check": "销量表入湖质量入账 120",
+      "passed": true,
+      "detail": {
+        "quality": {
+          "table_name": "demo_销量湖表",
+          "booked_receipt_count": 1,
+          "booked_record_count": 120,
+          "receipts": [
+            {
+              "receipt_no": "CR-INGEST_PIPELINE-0001",
+              "task_no": "4",
+              "task_name": "demo_销量入湖任务",
+              "table_name": "demo_销量湖表",
+              "record_count": 120,
+              "booked_at": "2026-11-22T06:13:52.679800"
+            }
+          ]
+        },
+        "metrics": {
+          "target_table": "demo_销量湖表",
+          "task_module": "ingest_pipeline",
+          "receipt_count": 1,
+          "confirmed_receipt_count": 1,
+          "record_count": 120,
+          "unconfirmed_record_count": 0
+        }
+      }
+    },
+    {
+      "check": "销量表回填计量为 0（不串表）",
+      "passed": true,
+      "detail": {
+        "target_table": "demo_销量湖表",
+        "task_module": "backfill_job",
+        "receipt_count": 0,
+        "confirmed_receipt_count": 0,
+        "record_count": 0,
+        "unconfirmed_record_count": 0
+      }
+    },
+    {
+      "check": "库存表回填计量 76+40=116（不串表）",
+      "passed": true,
+      "detail": {
+        "target_table": "demo_库存湖表",
+        "task_module": "backfill_job",
+        "receipt_count": 2,
+        "confirmed_receipt_count": 2,
+        "record_count": 116,
+        "unconfirmed_record_count": 0
+      }
+    },
+    {
+      "check": "库存表入湖计量为 0、质量读不到销量行数",
+      "passed": true,
+      "detail": {
+        "ingest_metrics": {
+          "target_table": "demo_库存湖表",
+          "task_module": "ingest_pipeline",
+          "receipt_count": 0,
+          "confirmed_receipt_count": 0,
+          "record_count": 0,
+          "unconfirmed_record_count": 0
+        },
+        "quality": {
+          "table_name": "demo_库存湖表",
+          "booked_receipt_count": 0,
+          "booked_record_count": 0,
+          "receipts": []
+        }
+      }
+    },
+    {
+      "check": "原任务号可查三份完成明细",
+      "passed": true,
+      "detail": {
+        "ingest": [
+          {
+            "receipt_no": "CR-INGEST_PIPELINE-0001",
+            "task_module": "ingest_pipeline",
+            "task_id": 4,
+            "task_no": "4",
+            "task_name": "demo_销量入湖任务",
+            "target_table": "demo_销量湖表",
+            "record_count": 120,
+            "status": "已完成",
+            "consumer_module": "quality_monitor",
+            "registered_at": "2026-11-22T06:13:52.679796",
+            "delivered": true,
+            "delivered_at": "2026-11-22T06:13:52.679803",
+            "confirmed": true,
+            "confirmed_at": "2026-11-22T06:13:52.679801",
+            "confirmed_by": "quality_monitor",
+            "confirmations": 1,
+            "delivery_count": 1
+          }
+        ],
+        "backfill": [
+          {
+            "receipt_no": "CR-BACKFILL_JOB-0002",
+            "task_module": "backfill_job",
+            "task_id": 4,
+            "task_no": "4",
+            "task_name": "demo_库存回填任务",
+            "target_table": "demo_库存湖表",
+            "record_count": 76,
+            "status": "已完成",
+            "consumer_module": "govern_report",
+            "registered_at": "2026-11-22T06:13:52.681032",
+            "delivered": true,
+            "delivered_at": "2026-11-22T06:13:52.681035",
+            "confirmed": true,
+            "confirmed_at": "2026-11-22T06:13:52.681046",
+            "confirmed_by": "govern_report",
+            "confirmations": 1,
+            "delivery_count": 1
+          }
+        ],
+        "next_backfill": [
+          {
+            "receipt_no": "CR-BACKFILL_JOB-0003",
+            "task_module": "backfill_job",
+            "task_id": 5,
+            "task_no": "5",
+            "task_name": "demo_库存回填任务_下一笔",
+            "target_table": "demo_库存湖表",
+            "record_count": 40,
+            "status": "已完成",
+            "consumer_module": "govern_report",
+            "registered_at": "2026-11-22T06:13:52.681906",
+            "delivered": true,
+            "delivered_at": "2026-11-22T06:13:52.682155",
+            "confirmed": true,
+            "confirmed_at": "2026-11-22T06:13:52.682395",
+            "confirmed_by": "govern_report",
+            "confirmations": 1,
+            "delivery_count": 4
+          }
+        ],
+        "bare_task_no_4_cross_kind": [
+          {
+            "receipt_no": "CR-INGEST_PIPELINE-0001",
+            "task_module": "ingest_pipeline",
+            "task_id": 4,
+            "task_no": "4",
+            "task_name": "demo_销量入湖任务",
+            "target_table": "demo_销量湖表",
+            "record_count": 120,
+            "status": "已完成",
+            "consumer_module": "quality_monitor",
+            "registered_at": "2026-11-22T06:13:52.679796",
+            "delivered": true,
+            "delivered_at": "2026-11-22T06:13:52.679803",
+            "confirmed": true,
+            "confirmed_at": "2026-11-22T06:13:52.679801",
+            "confirmed_by": "quality_monitor",
+            "confirmations": 1,
+            "delivery_count": 1
+          },
+          {
+            "receipt_no": "CR-BACKFILL_JOB-0002",
+            "task_module": "backfill_job",
+            "task_id": 4,
+            "task_no": "4",
+            "task_name": "demo_库存回填任务",
+            "target_table": "demo_库存湖表",
+            "record_count": 76,
+            "status": "已完成",
+            "consumer_module": "govern_report",
+            "registered_at": "2026-11-22T06:13:52.681032",
+            "delivered": true,
+            "delivered_at": "2026-11-22T06:13:52.681035",
+            "confirmed": true,
+            "confirmed_at": "2026-11-22T06:13:52.681046",
+            "confirmed_by": "govern_report",
+            "confirmations": 1,
+            "delivery_count": 1
+          }
+        ]
+      }
+    }
+  ]
+}

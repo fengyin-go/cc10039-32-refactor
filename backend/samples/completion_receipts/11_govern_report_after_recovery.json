@@ -1,0 +1,51 @@
+{
+  "ok": true,
+  "message": "治理报告已生成：迁移分区=0，质量检查=0，血缘链路=3，回填任务=2，回填入账行数=116",
+  "entry": {
+    "id": 5,
+    "报告周期": "demo_2026-W47_恢复后",
+    "治理指标": "回填完成量",
+    "优化建议": "修复 1 条断裂血缘链路",
+    "执行状态": "报告已生成",
+    "审批状态": null,
+    "status": "已生成",
+    "pending": true,
+    "abnormal": false,
+    "report_data": {
+      "report_period": "demo_2026-W47_恢复后",
+      "generated_at": "2026-11-22T06:13:52.682400",
+      "storage_governance": {
+        "tier_migrations": 0,
+        "total_partitions_migrated": 0,
+        "completed_compactions": 0,
+        "completed_cleanups": 0
+      },
+      "quality_monitoring": {
+        "quality_checks": 0,
+        "failures": 0,
+        "passes": 0
+      },
+      "lineage_health": {
+        "total_lineages": 3,
+        "broken": 1,
+        "uncertain": 1,
+        "healthy": 1
+      },
+      "backfill_summary": {
+        "completed_backfills": 2,
+        "confirmed_receipts": 2,
+        "total_backfill_records": 116,
+        "by_table": {
+          "demo_库存湖表": {
+            "target_table": "demo_库存湖表",
+            "task_module": "backfill_job",
+            "receipt_count": 2,
+            "confirmed_receipt_count": 2,
+            "record_count": 116,
+            "unconfirmed_record_count": 0
+          }
+        }
+      }
+    }
+  }
+}

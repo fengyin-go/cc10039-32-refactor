@@ -2,12 +2,17 @@
 
 支持回填检查点（checkpoint）：中断后可从上次位置继续，不会重复处理已完成的记录。
 上游接收 Schema 演进的不兼容变更事件，下游联动治理报告记录回填结果。
+
+完工处理与入湖管道共用“任务完成数据回执”登记（completion_receipt）：
+完成状态先持久化、回执交治理报告确认；重发完工复用同一回执，不重复投递
+事件、不重复入账，计量按目标湖表隔离。
 """
 from __future__ import annotations
 
 from typing import Any
 
 from app.services.base import BaseModuleService
+from app.services.completion_receipt import completion_registry
 from app.store import store
 
 
@@ -80,32 +85,90 @@ class BackfillJobService(BaseModuleService):
 
         return entry, f"回填任务检查点已更新：已处理 {processed_count} 条记录"
 
-    def complete_backfill(self, entry_id: int, total_records: int) -> tuple[dict[str, Any] | None, str]:
-        """完成回填任务，通知治理报告。"""
-        entry = store.find(self.MODULE, entry_id)
-        if entry is None:
-            return None, "回填任务不存在"
-        if entry.get("status") != "回填中":
-            return None, f"回填任务状态为{entry.get('status')}，不可完成"
-
-        table_name = entry.get("目标湖表", "")
-
+    def _persist_completion(self, entry: dict[str, Any], total_records: int) -> dict[str, Any]:
+        """完成状态持久化 + 统一回执登记（不投递治理报告事件）。"""
         entry["status"] = "已完成"
         entry["pending"] = False
         entry["abnormal"] = False
         entry["处理记录数"] = str(total_records)
 
         # 清理检查点
-        self._checkpoints.pop(entry_id, None)
+        self._checkpoints.pop(int(entry["id"]), None)
 
-        # 通知治理报告
+        receipt, _ = completion_registry.register(
+            task_module=self.MODULE,
+            task_id=int(entry["id"]),
+            task_no=str(entry["id"]),
+            task_name=entry.get("任务名称", ""),
+            target_table=entry.get("目标湖表", ""),
+            record_count=total_records,
+            status=entry["status"],
+        )
+        return receipt
+
+    def _deliver_to_govern(self, entry: dict[str, Any], receipt: dict[str, Any],
+                           total_records: int) -> None:
+        """把任务完成数据回执交给治理报告（仅首次完工投递一次）。"""
         store.log_event("backfill_completed_to_govern", "backfill_job", "govern_report", {
-            "task_id": entry_id,
-            "table_name": table_name,
+            "task_id": entry["id"],
+            "table_name": receipt["target_table"],
             "total_records": total_records,
+            "receipt_no": receipt["receipt_no"],
         })
+        completion_registry.mark_delivered(receipt)
 
-        return entry, f"回填任务 {entry.get('任务名称')} 已完成，总计 {total_records} 条记录"
+    def complete_backfill(self, entry_id: int, total_records: int) -> tuple[dict[str, Any] | None, str]:
+        """完成回填任务，登记统一回执并通知治理报告。"""
+        entry = store.find(self.MODULE, entry_id)
+        if entry is None:
+            return None, "回填任务不存在"
+        if entry.get("status") != "回填中":
+            return None, f"回填任务状态为{entry.get('status')}，不可完成"
+
+        receipt = self._persist_completion(entry, total_records)
+        self._deliver_to_govern(entry, receipt, total_records)
+
+        return entry, (
+            f"回填任务 {entry.get('任务名称')} 已完成，总计 {total_records} 条记录，"
+            f"回执 {receipt['receipt_no']} 已通知治理报告"
+        )
+
+    def persist_backfill_completion(self, entry_id: int, total_records: int) -> tuple[dict[str, Any] | None, str]:
+        """只持久化完成状态并登记回执，不投递治理报告（模拟完工请求被打断）。"""
+        entry = store.find(self.MODULE, entry_id)
+        if entry is None:
+            return None, "回填任务不存在"
+        if entry.get("status") != "回填中":
+            return None, f"回填任务状态为{entry.get('status')}，不可完成"
+
+        receipt = self._persist_completion(entry, total_records)
+        return entry, (
+            f"回填任务 {entry.get('任务名称')} 完成状态已持久化，回执 {receipt['receipt_no']} "
+            "待治理报告确认（投递前停住）"
+        )
+
+    def redeliver_completion(self, entry_id: int) -> tuple[dict[str, Any] | None, str]:
+        """重发完工请求：复用既有回执；已确认则不再重复投递与入账。"""
+        entry = store.find(self.MODULE, entry_id)
+        if entry is None:
+            return None, "回填任务不存在"
+        receipt = completion_registry.find_task(self.MODULE, entry_id)
+        if receipt is None:
+            return None, "回填任务尚未登记完成回执，无法重发完工"
+
+        completion_registry.mark_redelivery(receipt)
+        if receipt.get("delivered"):
+            return entry, (
+                f"回填任务 {entry.get('任务名称')} 完工请求已重发（第 {receipt['delivery_count']} 次投递），"
+                f"回执 {receipt['receipt_no']} 已投递，跳过重复事件"
+                + ("（已确认入账）" if receipt["confirmed"] else "（待治理报告确认）")
+            )
+
+        self._deliver_to_govern(entry, receipt, receipt["record_count"])
+        return entry, (
+            f"回填任务 {entry.get('任务名称')} 完工请求已重发（第 {receipt['delivery_count']} 次投递），"
+            f"回执 {receipt['receipt_no']} 已补交给治理报告"
+        )
 
     def fail_backfill(self, entry_id: int) -> tuple[dict[str, Any] | None, str]:
         """回填失败：保留检查点以便恢复。"""

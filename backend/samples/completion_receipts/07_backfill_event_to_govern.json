@@ -1,0 +1,15 @@
+[
+  {
+    "id": 9,
+    "event_type": "backfill_completed_to_govern",
+    "source_module": "backfill_job",
+    "target_module": "govern_report",
+    "timestamp": "2026-11-22T06:13:52.681034",
+    "payload": {
+      "task_id": 4,
+      "table_name": "demo_库存湖表",
+      "total_records": 76,
+      "receipt_no": "CR-BACKFILL_JOB-0002"
+    }
+  }
+]

@@ -1,0 +1,59 @@
+{
+  "demo_销量湖表": {
+    "ingest_pipeline": {
+      "target_table": "demo_销量湖表",
+      "task_module": "ingest_pipeline",
+      "receipt_count": 1,
+      "confirmed_receipt_count": 1,
+      "record_count": 120,
+      "unconfirmed_record_count": 0
+    },
+    "backfill_job": {
+      "target_table": "demo_销量湖表",
+      "task_module": "backfill_job",
+      "receipt_count": 0,
+      "confirmed_receipt_count": 0,
+      "record_count": 0,
+      "unconfirmed_record_count": 0
+    },
+    "quality_ingest_booked": {
+      "table_name": "demo_销量湖表",
+      "booked_receipt_count": 1,
+      "booked_record_count": 120,
+      "receipts": [
+        {
+          "receipt_no": "CR-INGEST_PIPELINE-0001",
+          "task_no": "4",
+          "task_name": "demo_销量入湖任务",
+          "table_name": "demo_销量湖表",
+          "record_count": 120,
+          "booked_at": "2026-11-22T06:13:52.679800"
+        }
+      ]
+    }
+  },
+  "demo_库存湖表": {
+    "ingest_pipeline": {
+      "target_table": "demo_库存湖表",
+      "task_module": "ingest_pipeline",
+      "receipt_count": 0,
+      "confirmed_receipt_count": 0,
+      "record_count": 0,
+      "unconfirmed_record_count": 0
+    },
+    "backfill_job": {
+      "target_table": "demo_库存湖表",
+      "task_module": "backfill_job",
+      "receipt_count": 2,
+      "confirmed_receipt_count": 2,
+      "record_count": 116,
+      "unconfirmed_record_count": 0
+    },
+    "quality_ingest_booked": {
+      "table_name": "demo_库存湖表",
+      "booked_receipt_count": 0,
+      "booked_record_count": 0,
+      "receipts": []
+    }
+  }
+}

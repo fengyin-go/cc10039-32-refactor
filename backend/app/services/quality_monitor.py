@@ -8,6 +8,7 @@ from __future__ import annotations
 from typing import Any
 
 from app.services.base import BaseModuleService
+from app.services.completion_receipt import completion_registry
 from app.store import store
 
 
@@ -23,6 +24,46 @@ class QualityMonitorService(BaseModuleService):
 
     # 质量检查结果存储
     _check_results: list[dict[str, Any]] = []
+    # 入湖完成回执入账结果：key=(任务模块, 任务id)，按目标湖表隔离
+    _intake: dict[tuple[str, int], dict[str, Any]] = {}
+
+    def accept_ingest_receipt(self, receipt: dict[str, Any]) -> dict[str, Any]:
+        """入湖管道完成回执入账（质量监控侧）。
+
+        同一份回执重复投递只入账一次：已入账时原样返回既有结果，
+        并把统一回执置为已确认，使入湖行数可在质量结果中核对。
+        """
+        key = (receipt["task_module"], receipt["task_id"])
+        existing = self._intake.get(key)
+        if existing is not None:
+            return existing
+
+        result = {
+            "receipt_no": receipt["receipt_no"],
+            "task_no": receipt["task_no"],
+            "task_name": receipt["task_name"],
+            "table_name": receipt["target_table"],
+            "record_count": int(receipt["record_count"]),
+            "booked_at": __import__("datetime").datetime.now().isoformat(),
+        }
+        self._intake[key] = result
+        completion_registry.confirm(
+            receipt["task_module"], receipt["task_id"], self.MODULE
+        )
+        return result
+
+    def ingest_quality_for_table(self, table_name: str) -> dict[str, Any]:
+        """按目标湖表汇总已入账的入湖完成数，质量结果按表隔离。"""
+        booked = [
+            item for item in self._intake.values()
+            if item["table_name"] == table_name
+        ]
+        return {
+            "table_name": table_name,
+            "booked_receipt_count": len(booked),
+            "booked_record_count": sum(int(item["record_count"]) for item in booked),
+            "receipts": booked,
+        }
 
     def enable_monitor(self, entry_id: int) -> tuple[dict[str, Any] | None, str]:
         """启用监控规则：验证目标湖表存在。"""
